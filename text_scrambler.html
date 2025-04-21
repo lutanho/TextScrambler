@@ -1,0 +1,167 @@
+<html>
+<head>
+<title>Scramble and unscramble text</title>
+<script language="JavaScript">
+var scrambleType="Letters";
+var CanvasSize=384;
+var isSM=1;
+var A=new Array();
+function ToggleSM()
+{ isSM++;
+  ShowSM();
+}  
+function ShowSM()
+{ var ii, nn, cc="", rr=0;;
+  if (isSM%2>0) 
+  { nn=A.length-1;
+    if (isSM%4>1)
+    { for (ii=0; ii<=nn; ii++) 
+        cc+="<div style='position:absolute;left:"+(A[ii]*CanvasSize/nn)+"px;top:"+((nn-ii)*CanvasSize/nn-8)+"px;width:32px;height:32px;color:#ffffff;font-size:32px'>*</div>";
+    }
+    else
+    { for (ii=0; ii<=nn; ii++) //rot: x,y->(x+y)/2,1+(y-x)/2
+        cc+="<div style='position:absolute;left:"+((ii+A[ii])/nn/2*CanvasSize)+"px;top:"+(((A[ii]-ii)/nn+1)/2*CanvasSize-8)+"px;width:32px;height:32px;color:#ffffff;font-size:32px'>*</div>";
+    }
+    nn++;
+    for (ii=0; ii<nn; ii++) rr+=(ii-A[ii])*(ii-A[ii]);
+    rr/=nn*(nn*nn-1);
+    rr=1-6*rr;
+    document.getElementById('r').innerHTML="r = "+(Math.round(rr*100)/100);
+    document.getElementById('canvas').innerHTML=cc;
+    document.getElementById('canvas').style.visibility='visible';
+    document.getElementById('r').style.visibility='visible'; 
+  }
+  else
+  { document.getElementById('r').innerHTML="";
+    document.getElementById('canvas').innerHTML="";
+    document.getElementById('canvas').style.visibility='hidden';
+    document.getElementById('r').style.visibility='hidden';
+  }
+}
+function SetType(tt)
+{ scrambleType=tt;
+}
+function scramble(bb)
+{ var ss, oo, ii, cc="", nn;
+  var pp=window.document.forms[0].p.value;
+  if (bb>0) ss=escape(window.document.forms[0].i.value).replace(/%20/g,' ');
+  else ss=window.document.forms[0].o.value;
+  if (pp)
+  { if (scrambleType=="Words") oo=scrambleWords(ss,pp,bb);
+    else oo=scrambleLetters(ss,pp,bb);
+    if (bb>0) window.document.forms[0].o.value=oo;
+    else window.document.forms[0].i.value=unescape(oo);  
+    ShowSM();
+    window.document.forms[0].counter.value=A.length;
+  }
+  else alert("Password required!");
+}
+
+function scrambleWords(ss,pp,bb)
+{ var ii, jj, cc, tt, nn=0, mm=0, ccs;
+  var aa=ss.split(" "), ll=aa.length;
+  A.length=0;
+  for (ii=0;ii<ll; ii++)
+  { nn+=aa[ii].charCodeAt(0);
+    A[ii]=ii;
+  }
+  for (ii=0;ii<pp.length; ii++)
+    mm+=pp.charCodeAt(ii);
+  nn%=pp.length;
+  ccs=pp.substr(nn);
+  while (ccs.length<ll) ccs+=pp;
+  
+  if(bb>0)
+  { for (ii=0; ii<ll; ii++)
+    { cc=(ccs.charCodeAt(ii)+mm)%ll;
+      cc=(cc*(cc*((cc*(cc*((cc*(cc+ll-ii+6)+ii+5))%ll+ll-ii+4)+ii+3))%ll+ll-ii+2)+ii+1)%ll;
+      tt=aa[cc];
+      aa[cc]=aa[ii];
+      aa[ii]=tt;
+      tt=A[cc];
+      A[cc]=A[ii];
+      A[ii]=tt;
+    }
+  }
+  else
+  { for (ii=ll-1;ii>=0; ii--)
+    { cc=(ccs.charCodeAt(ii)+mm)%ll;
+      cc=(cc*(cc*((cc*(cc*((cc*(cc+ll-ii+6)+ii+5))%ll+ll-ii+4)+ii+3))%ll+ll-ii+2)+ii+1)%ll;
+      tt=aa[cc];
+      aa[cc]=aa[ii];
+      aa[ii]=tt;
+      tt=A[cc];
+      A[cc]=A[ii];
+      A[ii]=tt;
+    }
+  }
+  return(aa.join(" "));
+}
+
+function scrambleLetters(ss,pp,bb)
+{ var ii, jj, oo="", aa=new Array(), cc, tt, ll=ss.length, nn=0, mm=0, ccs;
+  A.length=0;
+  for (ii=0;ii<ll; ii++)
+  { aa[ii]=ss.charAt(ii);
+    nn+=ss.charCodeAt(ii);
+    A[ii]=ii;
+  }
+  for (ii=0;ii<pp.length; ii++)
+    mm+=pp.charCodeAt(ii);
+  nn%=pp.length;
+  ccs=pp.substr(nn);
+  while (ccs.length<ll) ccs+=pp;
+  if(bb>0)
+  { for (ii=0;ii<ll; ii++)
+    { cc=(ccs.charCodeAt(ii)+mm)%ll;
+      cc=(cc*(cc*((cc*(cc*((cc*(cc+ll-ii+6)+ii+5))%ll+ll-ii+4)+ii+3))%ll+ll-ii+2)+ii+1)%ll;
+      tt=aa[cc];
+      aa[cc]=aa[ii];
+      aa[ii]=tt;
+      tt=A[cc];
+      A[cc]=A[ii];
+      A[ii]=tt;
+    }
+  }
+  else
+  { for (ii=ll-1;ii>=0; ii--)
+    { cc=(ccs.charCodeAt(ii)+mm)%ll;
+      cc=(cc*(cc*((cc*(cc*((cc*(cc+ll-ii+6)+ii+5))%ll+ll-ii+4)+ii+3))%ll+ll-ii+2)+ii+1)%ll;
+      tt=aa[cc];
+      aa[cc]=aa[ii];
+      aa[ii]=tt;
+      tt=A[cc];
+      A[cc]=A[ii];
+      A[ii]=tt;
+    }
+  }
+  for (ii=0;ii<ll; ii++)
+    oo+=aa[ii];
+  return(oo);
+}
+</script>
+</head>
+<body>
+<form>
+<table border=0 cellpadding=2 cellspacing=2 align=center><tr><td width=80>Password:</td>
+<td colspan=2><input style='width:515px' name='p' value='This is my very long and very secret password.'></td>
+<th id='r'></th></tr>
+<tr><td colspan=3>
+<textarea name="i" style='width:600px; height:180px' cols=72 rows=11 wrap="virtual">This is my very secret text! This is more of my very secret text! This is even more of my very secret text! And this is even more of my very secret text! &#128512;</textarea>
+</td><td rowspan=3>
+<div style='width:400px; height:400px;border:6px inset #f0c080; position:relative;background-color:#8080ff' id='canvas'>&nbsp;</div>
+</td></tr>
+<tr><td colspan=2>
+<input type="button" value="&#8595; scramble &#8595;" onClick="scramble(1)">
+<input type="button" value="&#8593; unscramble &#8593;" onClick="scramble(-1)">
+<select onchange="SetType(this.options[this.options.selectedIndex].value)"><option value="Letters">Letters</option><option value="Words">Words</option></select>
+<input style='width:48px;text-align:center; background-color:#c0c0ff' name='counter' readonly value=''>
+</td><td>
+<input type=checkbox name='sm' checked onchange='ToggleSM(this.checked)'>Scramble Matrix <font size=+2>&#9758;</font>
+</td></tr>
+<tr><td colspan=3>
+<textarea name="o" style='width:600px; height:180px' cols=72 rows=11 wrap="virtual"></textarea>
+</td></tr></table>
+</form>
+</body>
+</html>
